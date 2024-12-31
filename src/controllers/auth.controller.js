@@ -1,39 +1,118 @@
-const User = require("../models/user.model");
+const { validationResult } = require("express-validator");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("../config/env.config");
-  // #swagger.tags = ['auth']
-exports.register = async (req, res) => {
-  const { username, email, password } = req.body;
+const User = require("../models/user-model");
+
+const registerUser = async (req, res) => {
   try {
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "Email already exists" });
+    // Validate incoming request data
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        msg: "Validation errors",
+        errors: errors.array(),
+      });
     }
-    const newUser = new User({ username, email, password });
-    await newUser.save();
-    res.status(201).json({ message: "User registered successfully" });
+
+    const { name, email, password } = req.body;
+
+    // Check if the user already exists
+    const isExistingUser = await User.findOne({ email });
+    if (isExistingUser) {
+      return res.status(400).json({
+        success: false,
+        msg: "Email already exists!",
+      });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new user
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    // Save the new user to the database
+    const userData = await user.save();
+
+    return res.status(201).json({
+      success: true,
+      msg: "User registered successfully!",
+      data: userData,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error(error); // Log the error for debugging
+    return res.status(500).json({
+      success: false,
+      msg: error.message || "Internal server error",
+    });
   }
 };
-  // #swagger.tags = ['auth']
-exports.login = async (req, res) => {
-  const { email, password } = req.body;
+
+const loginUser = async (req, res) => {
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(200).json({
+        success: false,
+        msg: "Errors",
+        errors: errors.array(),
+      });
+    }
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch)
-      return res.status(400).json({ message: "Invalid credentials" });
+    const { email, password } = req.body;
+    const userData = await User.findOne({ email });
+    if (!userData) {
+      return res.status(200).json({
+        success: false,
+        msg: "User not found",
+      });
+    }
 
-    const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      config.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-    res.json({ message: "Login successful", token });
+    bcrypt.compare(password, userData.password, (err, result) => {
+      if (err) {
+        return res.status(200).json({
+          success: false,
+          msg: "Invalid credentials",
+        });
+      }
+      if (result) {
+        // Remove the password field before returning user data
+        const userWithoutPassword = userData.toObject();
+        delete userWithoutPassword.password;
+
+        const token = jwt.sign(
+          { userId: userData._id, role: userData.role },
+          config.JWT_SECRET,
+          { expiresIn: "1h" }
+        );
+
+        return res.status(200).json({
+          success: true,
+          msg: "Login successful",
+          data: userWithoutPassword, // Return user data without password
+          token,
+        });
+      }
+      return res.status(200).json({
+        success: false,
+        msg: "Invalid credentials",
+      });
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    return res.status(400).json({
+      success: false,
+      msg: error.msg,
+    });
   }
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
 };

@@ -1,16 +1,13 @@
 const express = require("express");
 const connectDB = require("./config/db.config");
 const cors = require("cors");
-const swaggerConfig = require("./config/swagger.config");
-const authMiddleware = require("./middlewares/auth.middleware");
 const errorMiddleware = require("./middlewares/error.middleware");
-const validationMiddleware = require("./middlewares/validation.middleware");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./config/swagger-output.json");
-
 // Routes
 const productRoutes = require("./routes/product.routes");
-const authRoutes = require("./routes/auth.routes");
+const authRoute = require("./routes/auth.routes");
+const adminRoute = require("./routes/admin.routes");
 
 const app = express();
 
@@ -27,7 +24,9 @@ app.use(
 
 // API Routes
 app.use("/api/products", productRoutes);
-app.use("", authRoutes);
+app.use("/api/", authRoute);
+app.use("/api/admin/", adminRoute);
+
 app.use("/api", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Global Error Handler

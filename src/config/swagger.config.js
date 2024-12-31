@@ -1,3 +1,5 @@
+const swaggerAutogen = require("swagger-autogen")(); // Properly define swaggerAutogen
+
 const options = {
   openapi: "OpenAPI 3",
   language: "en-US",
@@ -6,7 +8,6 @@ const options = {
   autoQuery: false,
   autoBody: false,
 };
-const generateSwagger = require("swagger-autogen")();
 
 const swaggerDocument = {
   info: {
@@ -18,19 +19,26 @@ const swaggerDocument = {
       email: "duhasoftwares@outlook.com",
     },
   },
-  host: "localhost:3000",
+  host:
+    process.env.NODE_ENV === "production"
+      ? "api.duhasoftwares.com"
+      : "localhost:3000",
   basePath: "/",
-  schemes: ["http"],
+  schemes: process.env.NODE_ENV === "production" ? ["https"] : ["http"],
   consumes: ["application/json"],
   produces: ["application/json"],
   tags: [
     {
       name: "auth",
-      description: "Auth related apis",
+      description: "Auth related APIs",
     },
     {
       name: "product",
-      description: "product api's ",
+      description: "Product APIs",
+    },
+    {
+      name: "Authentication",
+      description: "Authentication related APIs",
     },
   ],
   securityDefinitions: {},
@@ -53,7 +61,7 @@ const swaggerDocument = {
       message: "You do not have permission to access this resource.",
     },
     "errorResponse.404": {
-      code: "404",
+      code: 404,
       message: "The requested resource could not be found on the server.",
     },
     "errorResponse.500": {
@@ -63,6 +71,25 @@ const swaggerDocument = {
     },
   },
 };
-const swaggerFile = "./config/swagger-output.json";
-const apiRouteFile = ["./routes/auth.routes.js", "./routes/product.routes.js"];
-generateSwagger(swaggerFile, apiRouteFile, swaggerDocument);
+
+const outputFile = "./config/swagger-output.json";
+const endpointsFiles = [
+  "./app.js",
+  "./routes/auth.routes.js",
+  "./routes/product.routes.js",
+  "./routes/authentication.route.js",
+];
+
+// Generate Swagger documentation
+if (process.env.NODE_ENV === "development") {
+  console.log("Generating Swagger documentation...");
+  swaggerAutogen(outputFile, endpointsFiles, swaggerDocument, options)
+    .then(() => {
+      console.log("Swagger documentation generated successfully.");
+    })
+    .catch((err) => {
+      console.error("Failed to generate Swagger documentation:", err);
+    });
+} else {
+  console.log("Skipping Swagger generation for production.");
+}

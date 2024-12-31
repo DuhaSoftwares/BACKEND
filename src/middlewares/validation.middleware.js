@@ -1,11 +1,18 @@
-const { validationResult } = require("express-validator");
+const { check } = require('express-validator')
 
-module.exports = (req, res, next) => {
-  const errors = validationResult(req);
 
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+exports.registerValidator = [
+  check("name", "name is required").not().isEmpty(),
+  check("email", "email is required").isEmail().normalizeEmail({
+    gmail_remove_dots: true,
+  }),
+  check("password", "password is required").not().isEmpty()
+];
 
-  next();
-};
+
+exports.loginValidator = [
+  check("email", "email is required").isEmail().normalizeEmail({
+    gmail_remove_dots: true,
+  }),
+  check("password", "password is required").not().isEmpty(),
+];
