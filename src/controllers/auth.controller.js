@@ -87,7 +87,7 @@ const loginUser = async (req, res) => {
         delete userWithoutPassword.password;
 
         const token = jwt.sign(
-          { userId: userData._id, role: userData.role },
+         { user: userWithoutPassword},
           config.JWT_SECRET,
           { expiresIn: "1h" }
         );
@@ -97,6 +97,7 @@ const loginUser = async (req, res) => {
           msg: "Login successful",
           data: userWithoutPassword, // Return user data without password
           token,
+          tokenType: "Bearer",
         });
       }
       return res.status(200).json({
@@ -112,7 +113,31 @@ const loginUser = async (req, res) => {
   }
 };
 
+
+const getProfile = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(400).json({
+        success: false,
+        msg: "User data not found in token",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      msg: "Profile fetched successfully",
+      data: req.user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      msg: error.message || "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
+  getProfile,
 };
