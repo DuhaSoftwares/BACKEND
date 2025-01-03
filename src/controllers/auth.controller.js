@@ -16,7 +16,7 @@ const registerUser = async (req, res) => {
       });
     }
 
-    const { name, email, password } = req.body;
+    const { name, email, password,role } = req.body;
 
     // Check if the user already exists
     const isExistingUser = await User.findOne({ email });
@@ -35,6 +35,7 @@ const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      role
     });
 
     // Save the new user to the database
@@ -122,11 +123,14 @@ const getProfile = async (req, res) => {
         msg: "User data not found in token",
       });
     }
+    const user_id = req.user._id;
+    const userData = await User.findOne({ _id: user_id });
+
 
     return res.status(200).json({
       success: true,
       msg: "Profile fetched successfully",
-      data: req.user,
+      data: userData,
     });
   } catch (error) {
     return res.status(500).json({

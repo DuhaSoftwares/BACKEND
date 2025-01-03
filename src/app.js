@@ -5,6 +5,7 @@ const errorMiddleware = require("./middlewares/error.middleware");
 const productRoutes = require("./routes/product.routes");
 const authRoute = require("./routes/auth.routes");
 const adminRoute = require("./routes/admin.routes");
+const categoryRoute = require("./routes/common-routes/category.routes");
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(
 app.use("/api/products", productRoutes);
 app.use("/api/auth/", authRoute);
 app.use("/api/admin/", adminRoute);
+app.use("/api/", categoryRoute);
 
 // Global Error Handler
 app.use(errorMiddleware);
