@@ -6,6 +6,7 @@ const productRoutes = require("./routes/product.routes");
 const authRoute = require("./routes/auth.routes");
 const adminRoute = require("./routes/admin.routes");
 const categoryRoute = require("./routes/common-routes/category.routes");
+const postRoute = require("./routes/common-routes/post.routes");
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/auth/", authRoute);
 app.use("/api/admin/", adminRoute);
 app.use("/api/", categoryRoute);
+app.use("/api/", postRoute);
 
 // Global Error Handler
 app.use(errorMiddleware);

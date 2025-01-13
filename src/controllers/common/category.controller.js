@@ -9,7 +9,7 @@ const addCategory = async (req, res) => {
       return res.status(400).json({
         success: false,
         msg: "Validation errors",
-        errors: errors.array(),
+        errors: errors.array() ,
       });
     }
 

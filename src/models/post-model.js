@@ -10,10 +10,16 @@ const PostSchema = new mongoose.Schema({
         type: String,
         required:true
     },
-    categories: {
-        type: Array,
+    categories: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'Category',
         required:false
-    }
+    }],
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "USER",
+          required: true,
+        },
 });
 
 module.exports=mongoose.model('Post',PostSchema)

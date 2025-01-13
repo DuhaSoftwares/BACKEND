@@ -7,7 +7,9 @@ const userPermissionsSchema = new mongoose.Schema({
     ref: "USER",
   },
   Permissions:[ {
-    permission_name: String,  // model route
+    modules: mongoose.Types.ObjectId,
+    required: true,
+    ref: "Module",
     permission_value:[Number], //0 create,1 read,2 edit,3 Delete
   }]
 });
