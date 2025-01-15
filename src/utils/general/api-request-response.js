@@ -7,9 +7,9 @@ function apiRequest(body) {
 }
 function apiResponse(
   data,
-  statusCode = 200,
-  isError = false,
-  errorData = null,
+  statusCode = Number,
+  isError = Boolean,
+  errorData = T,
   displayMessage = ""
 ) {
   return {

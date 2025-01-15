@@ -37,7 +37,6 @@ exports.getAllProducts = (req, res) => {
 
 exports.createProduct = (req, res) => {
   const { name, description, price, category } = apiRequest(req.body);
-
   // Validate input
   if (!name || !description || !price || !category) {
     return res.status(400).json({ message: "All fields are required" });
