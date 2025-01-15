@@ -1,4 +1,5 @@
 // Dummy data to simulate products in the database
+const {apiRequest,apiResponse,} = require("../utils/general/api-request-response");
 let products = [
   {
     id: 1,
@@ -24,12 +25,18 @@ let products = [
 ];
 exports.getAllProducts = (req, res) => {
   // Simulating database fetch
-  res.status(200).json(products);
+  const response = apiResponse(
+    products,
+    200,
+    false,
+    null,
+    "Products retrieved successfully"
+  );
+  res.status(200).json(response);
 };
 
-
 exports.createProduct = (req, res) => {
-  const { name, description, price, category } = req.body;
+  const { name, description, price, category } = apiRequest(req.body);
 
   // Validate input
   if (!name || !description || !price || !category) {
@@ -49,5 +56,5 @@ exports.createProduct = (req, res) => {
   products.push(newProduct);
 
   // Return a success response with the newly created product
-  res.status(201).json(newProduct);
+  res.status(201).json({ reqData: newProduct });
 };
